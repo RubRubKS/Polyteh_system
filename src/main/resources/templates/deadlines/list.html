@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Deadlines</title>
+</head>
+<body>
+<h1>Deadlines</h1>
+<a th:href="@{/deadlines/new}">Add New Deadline</a>
+
+<table>
+  <tr th:each="deadline : ${deadlines}">
+    <td th:text="${deadline.title}"></td>
+    <td th:text="${deadline.dueDate}"></td>
+    <td>
+      <a th:href="@{/deadlines/edit/{id}(id=${deadline.id})}">Edit</a>
+      <a th:href="@{/deadlines/delete/{id}(id=${deadline.id})}">Delete</a>
+    </td>
+  </tr>
+</table>
+
+<a href="/">Back to Home</a>
+</body>
+</html>

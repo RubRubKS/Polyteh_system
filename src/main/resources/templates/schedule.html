@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Расписание</title>
+</head>
+<body>
+<h1>Расписание группы</h1>
+<ul>
+  <li th:each="day : ${schedule.days}">
+    <h2 th:text="${day.dayString}"></h2>
+    <ul>
+      <li th:each="lesson : ${day.lessons}">
+        <strong th:text="${lesson.subject}"></strong> —
+        <span th:text="${lesson.teacher.fullName}"></span>,
+        <span th:text="${lesson.timeStart}"></span>–<span th:text="${lesson.timeEnd}"></span>
+      </li>
+    </ul>
+  </li>
+</ul>
+<a href="/">Назад</a>
+</body>
+</html>

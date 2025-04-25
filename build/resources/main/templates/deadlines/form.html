@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title th:text="${deadline.id} ? 'Edit Deadline' : 'New Deadline'"></title>
+</head>
+<body>
+<h1 th:text="${deadline.id} ? 'Edit Deadline' : 'New Deadline'"></h1>
+
+<form th:action="@{/deadlines/save}" th:object="${deadline}" method="post">
+  <input type="hidden" th:field="*{id}"/>
+
+  <label>Title:</label>
+  <input type="text" th:field="*{title}" required/><br/>
+
+  <label>Description:</label>
+  <textarea th:field="*{description}"></textarea><br/>
+
+  <label>Due Date:</label>
+  <input type="datetime-local" th:field="*{dueDate}" required/><br/>
+
+  <button type="submit">Save</button>
+</form>
+
+<a th:href="@{/deadlines}">Cancel</a>
+</body>
+</html>

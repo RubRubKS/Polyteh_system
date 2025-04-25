@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Расписание</title>
+</head>
+<body>
+<h1>Посмотреть расписание</h1>
+<form action="/schedule" method="post">
+    <label>Группа ID: <input type="number" name="groupId"/></label>
+    <button type="submit">Показать</button>
+</form>
+
+<a href="/deadlines">View Deadlines</a>
+
+<div th:if="${groupId}">
+    <h2>Расписание для группы ID: <span th:text="${groupId}"></span>:</h2>
+    <div th:utext="${schedule}"></div> <!-- Выводим отформатированное расписание -->
+</div>
+</body>
+</html>
