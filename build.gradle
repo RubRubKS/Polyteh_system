@@ -25,7 +25,16 @@ dependencies {
     implementation files('libs/json-simple-1.1.1.jar')
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    runtimeOnly 'com.h2database:h2'
+
+    // Драйвер для использования PostgreSQL
+    runtimeOnly 'org.postgresql:postgresql'
+
+    // Lombok для сокращения кода
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // Для тестирования
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 test {
