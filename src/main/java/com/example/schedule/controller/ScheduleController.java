@@ -1,7 +1,11 @@
 package com.example.schedule.controller;
 
+import com.example.schedule.model.ErrorResponse;
 import com.example.schedule.service.ScheduleService;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -11,17 +15,21 @@ import com.fleshka4.spbstu.ruz.api.models.Lesson;
 import com.fleshka4.spbstu.ruz.api.models.Week;
 import com.fleshka4.spbstu.ruz.api.RuzSpbStu;  // Импортируй этот класс, чтобы использовать getScheduleByGroupId
 
-@Controller
+@RestController
+@RequestMapping("/api/v1/schedule")
+@AllArgsConstructor
 public class ScheduleController {
 
-    @GetMapping("/")
+    ScheduleService scheduleService;
+
+    /*@GetMapping("/")
     public String index() {
         return "index";
-    }
+    }*/
 
-    @PostMapping("/schedule")
-    public String getSchedule(@RequestParam int groupId, Model model) {
-        model.addAttribute("groupId", groupId);
+    @GetMapping ("{group_number}")
+    public ResponseEntity<?> getScheduleByGroupNumber(@RequestParam int group_number) {
+        /*model.addAttribute("groupId", groupId);
         try {
             // Получаем расписание с помощью метода getScheduleByGroupId
             Schedule schedule = RuzSpbStu.getScheduleByGroupId(groupId);
@@ -33,7 +41,26 @@ public class ScheduleController {
         } catch (Exception e) {
             model.addAttribute("schedule", "Ошибка при получении расписания: " + e.getMessage());
         }
-        return "index";
+        return "index";*/
+        try {
+            Schedule schedule = scheduleService.getScheduleByGroupId(group_number); // Обращаемся в сервис для получения расписания
+
+            // Расписание не найдено
+            if (schedule == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new ErrorResponse("Расписание для группы с номером " + group_number + " не найдено"));
+            }
+
+            // Возвращаем успешный ответ с расписанием
+            return ResponseEntity.ok(schedule);
+        }
+        catch (Exception e) {
+            //TODO: добавить журнализацию ошибок (опционально)
+
+            // Возвращаем ошибку сервера
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponse("Произошла ошибка при получении расписания"));
+        }
     }
 
     // Форматирование расписания для отображения на веб-странице

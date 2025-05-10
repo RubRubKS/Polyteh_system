@@ -1,22 +1,16 @@
 package com.example.schedule.model;
 
+import lombok.Builder;
+import lombok.Data;
+
+import javax.persistence.Entity;
 import java.util.List;
 
+@Data
+@Builder
 public class Schedule {
+    private Long id;
+
     private String group;
     private List<Lesson> lessons;
-
-    // Геттеры и сеттеры
-    public String getGroup() {
-        return group;
-    }
-    public void setGroup(String group) {
-        this.group = group;
-    }
-    public List<Lesson> getLessons() {
-        return lessons;
-    }
-    public void setLessons(List<Lesson> lessons) {
-        this.lessons = lessons;
-    }
 }

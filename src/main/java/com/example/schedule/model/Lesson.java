@@ -1,34 +1,22 @@
 package com.example.schedule.model;
 
-public class Lesson {
-    private String subject;
-    private String teacher;
-    private String time;
-    private String room;
+import lombok.Builder;
+import lombok.Data;
 
-    // Геттеры и сеттеры
-    public String getSubject() {
-        return subject;
-    }
-    public void setSubject(String subject) {
-        this.subject = subject;
-    }
-    public String getTeacher() {
-        return teacher;
-    }
-    public void setTeacher(String teacher) {
-        this.teacher = teacher;
-    }
-    public String getTime() {
-        return time;
-    }
-    public void setTime(String time) {
-        this.time = time;
-    }
-    public String getRoom() {
-        return room;
-    }
-    public void setRoom(String room) {
-        this.room = room;
-    }
+import java.time.LocalDateTime;
+
+@Data
+@Builder
+public class Lesson {
+    private Long id;
+
+    private String subject;
+    private String type; // Тип пары (лекция, практика и т.д.)
+    private String teacher;
+    private String room;
+    private String sdoAddress; // Ссылка на СДО (если есть)
+    private LocalDateTime startTime; // Когда начинается
+    private LocalDateTime endTime;   // Когда заканчивается
+
+    private String dayOfWeek;       // День недели (Пн, Вт и т.д.)
 }
