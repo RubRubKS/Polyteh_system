@@ -64,7 +64,7 @@ public class ScheduleController {
     }
 
     // Форматирование расписания для отображения на веб-странице
-    private String formatSchedule(Schedule schedule) {
+    /*private String formatSchedule(Schedule schedule) {
         StringBuilder sb = new StringBuilder();
         sb.append("Неделя: ").append(schedule.getWeek().toString()).append("<br>");
         for (Day day : schedule.getDays()) {
@@ -80,5 +80,5 @@ public class ScheduleController {
             }
         }
         return sb.toString();
-    }
+    }*/
 }
