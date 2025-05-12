@@ -32,10 +32,13 @@ public class Lesson {
     @Column
     private String sdoAddress; // Ссылка на СДО (если есть)
     @Column(nullable = false)
-    private LocalDateTime startTime; // Когда начинается
+    private String startTime; // Когда начинается
     @Column(nullable = false)
-    private LocalDateTime endTime;   // Когда заканчивается
+    private String endTime;   // Когда заканчивается
 
     @Column(nullable = false)
     private String dayOfWeek;       // День недели (Пн, Вт и т.д.)
+
+    @Column
+    private String comment; // Комментарий студента к паре (если есть)
 }

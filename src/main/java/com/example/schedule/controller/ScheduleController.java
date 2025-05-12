@@ -1,6 +1,8 @@
 package com.example.schedule.controller;
 
 import com.example.schedule.model.ErrorResponse;
+import com.example.schedule.model.Schedule;
+import com.example.schedule.repository.ScheduleRepository;
 import com.example.schedule.service.ScheduleService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,17 +11,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import com.fleshka4.spbstu.ruz.api.models.Schedule;
+//import com.fleshka4.spbstu.ruz.api.models.Schedule;
 import com.fleshka4.spbstu.ruz.api.models.Day;
 import com.fleshka4.spbstu.ruz.api.models.Lesson;
 import com.fleshka4.spbstu.ruz.api.models.Week;
 import com.fleshka4.spbstu.ruz.api.RuzSpbStu;  // Импортируй этот класс, чтобы использовать getScheduleByGroupId
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/schedule")
 @AllArgsConstructor
 public class ScheduleController {
 
+    private final ScheduleRepository scheduleRepository;
     ScheduleService scheduleService;
 
     /*@GetMapping("/")
@@ -27,8 +32,9 @@ public class ScheduleController {
         return "index";
     }*/
 
-    @GetMapping ("{group_number}")
-    public ResponseEntity<?> getScheduleByGroupNumber(@RequestParam int group_number) {
+    // TODO: Параметр номера группы надо преобразовать в Id, используемый в ruz. Также надо внимательно проследить за данным параметром в других классах, так как могут возникнуть ошибки.
+    @GetMapping ("/{group_number}")
+    public ResponseEntity<?> getScheduleByGroupNumber(@PathVariable String group_number) {
         /*model.addAttribute("groupId", groupId);
         try {
             // Получаем расписание с помощью метода getScheduleByGroupId
@@ -43,7 +49,7 @@ public class ScheduleController {
         }
         return "index";*/
         try {
-            Schedule schedule = scheduleService.getScheduleByGroupId(group_number); // Обращаемся в сервис для получения расписания
+            Schedule schedule = scheduleService.getScheduleByGroupNumber(group_number); // Обращаемся в сервис для получения расписания
 
             // Расписание не найдено
             if (schedule == null) {

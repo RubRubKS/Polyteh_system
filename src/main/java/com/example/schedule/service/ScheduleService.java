@@ -1,13 +1,14 @@
 package com.example.schedule.service;
 
-import com.fleshka4.spbstu.ruz.api.RuzSpbStu;
-import com.fleshka4.spbstu.ruz.api.models.Schedule;
-import org.springframework.stereotype.Service;
+//import com.fleshka4.spbstu.ruz.api.RuzSpbStu;
+//import com.fleshka4.spbstu.ruz.api.models.Schedule;
 
-@Service
-public class ScheduleService {
+import com.example.schedule.model.Schedule;
 
-    public Schedule getScheduleByGroupId(int groupId) {
-        return RuzSpbStu.getScheduleByGroupId(groupId);
-    }
+import java.util.Optional;
+
+public interface ScheduleService {
+
+    public Schedule getScheduleByGroupNumber(String groupNumber);
+
 }
