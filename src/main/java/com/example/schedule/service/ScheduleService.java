@@ -1,14 +1,12 @@
 package com.example.schedule.service;
 
-//import com.fleshka4.spbstu.ruz.api.RuzSpbStu;
-//import com.fleshka4.spbstu.ruz.api.models.Schedule;
 
 import com.example.schedule.model.Schedule;
 
-import java.util.Optional;
+import java.io.IOException;
 
 public interface ScheduleService {
 
-    public Schedule getScheduleByGroupNumber(String groupNumber);
+    public Schedule getScheduleByGroupNumber(String groupNumber) throws IOException;
 
 }

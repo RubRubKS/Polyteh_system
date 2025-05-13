@@ -35,6 +35,9 @@ dependencies {
 
     // Для тестирования
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    // Библиотека для парсинга
+    implementation 'org.jsoup:jsoup:1.20.1'
 }
 
 test {

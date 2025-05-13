@@ -1,53 +1,43 @@
 package com.example.schedule.service.impl;
 
-import com.example.schedule.model.ErrorResponse;
-import com.example.schedule.model.Lesson;
-import com.example.schedule.model.Schedule;
+import com.example.schedule.model.*;
+import com.example.schedule.repository.GroupRepository;
 import com.example.schedule.repository.ScheduleRepository;
 import com.example.schedule.service.ScheduleService;
-// import com.fleshka4.spbstu.ruz.api.RuzSpbStu;
-//import com.fleshka4.spbstu.ruz.api.models.Schedule;
-import lombok.AllArgsConstructor;
+
 import lombok.RequiredArgsConstructor;
-import org.json.simple.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDate;
 import java.util.Optional;
 import java.time.LocalDateTime;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
 
 import org.springframework.beans.factory.annotation.Value;
 
 @Service
-//@AllArgsConstructor
 @RequiredArgsConstructor
+@Transactional
 public class ScheduleServiceImpl implements ScheduleService {
 
-    private final ScheduleRepository repository;
+    private final ScheduleRepository scheduleRepository;
+    private final GroupRepository groupRepository;
 
-    @Value("${external.api.url}")
-    private String externalApiUrl;
+    @Value("${external.url}")
+    private String externalUrl;
 
-    // TODO: Проследить правильность написания аннотации Transaction именно для этого метода, а не любого другого
     @Override
-    @Transactional
-    public Schedule getScheduleByGroupNumber(String groupNumber) {
+    public Schedule getScheduleByGroupNumber(String groupNumber) throws IOException {
+
         // Проверяем наличие расписания в БД
-        Optional<Schedule> existingSchedule = repository.getScheduleByGroupNumber(groupNumber);
-        Optional<LocalDateTime> lastUpdated = repository.findLastUpdatedByGroupNumber(groupNumber);
+        Optional<Schedule> existingSchedule = scheduleRepository.getScheduleByGroupNumber(groupNumber);
+        Optional<LocalDateTime> lastUpdated = scheduleRepository.findLastUpdatedByGroupNumber(groupNumber);
 
         // TODO: Добавить автообновление расписания
         // Проверяем наличие расписания
@@ -62,96 +52,93 @@ public class ScheduleServiceImpl implements ScheduleService {
                 new ErrorResponse("Schedule not found for group " + groupNumber));
     }
 
-    private Schedule getOrUpdateSchedule(String groupNumber) {
+    private Schedule getOrUpdateSchedule(String groupNumber) throws IOException {
+
         // Получение нового расписания с сайта ruz
         Schedule schedule = getScheduleFromWebsite(groupNumber);
 
         // Обновление БД
         // Удаление старого расписания (если есть)
-        repository.getScheduleByGroupNumber(groupNumber)
-                .ifPresent(s -> repository.deleteScheduleByGroupNumber(s.getGroupNumber()));
+        scheduleRepository.getScheduleByGroupNumber(groupNumber)
+                .ifPresent(s -> scheduleRepository.deleteScheduleByGroupNumber(s.getGroupNumber()));
         // Добавление нового расписания в БД
-        repository.save(schedule);
+        scheduleRepository.save(schedule);
 
         return schedule;
     }
 
-    private Schedule getScheduleFromWebsite(String groupNumber) {
-        try {
-            JSONObject json = request(externalApiUrl + "scheduler/" + groupNumber);
-            if(json.get("error") != null) {
-                throw new ErrorResponse("Ошибка API: " + json.get("text"));
-            }
-            return parseJsonToSchedule(json, groupNumber);
-        }
-        catch(Exception e) {
-            throw new ErrorResponse(e.getMessage());
-        }
-    }
+    // Функция для парсинга сайта расписания
+    private Schedule getScheduleFromWebsite(String groupNumber) throws IOException {
 
-    // Метод для получения JSON объекта расписания с ruz
-    private static JSONObject request(String requestLink) {
-        try {
-            URL ruz = new URL(requestLink);
-            URLConnection yc = ruz.openConnection();
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(
-                            yc.getInputStream()));
-            String inputLine;
-            StringBuilder result = new StringBuilder();
-            while ((inputLine = in.readLine()) != null) {
-                result.append(inputLine);
-            }
-            JSONParser ruzPars = new JSONParser();
-            JSONObject jsonObject = (JSONObject) ruzPars.parse(result.toString());
-            in.close();
-            return jsonObject;
-        } catch (ParseException | IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
+        // Получаем параметры соответствующей группы (id и faculty) для получения их расписания
+        /*Group group = groupRepository.getGroupByGroupNumber(groupNumber).orElseThrow(() ->
+                new ErrorResponse("Group not found for group " + groupNumber));*/
 
-    // Метод для преобразования JSON объекта в объект класса Schedule
-    private Schedule parseJsonToSchedule(JSONObject json, String groupNumber) {
+        // Получаем HTML-код страницы расписания указанной группы
+        /*String link = externalUrl + "faculty/" + group.getFaculty() + "/groups/" + group.getGroupId()
+                + "?date=" + LocalDateTime.now();*/
+        String link = externalUrl + "faculty/125/groups/40455?date=" + LocalDate.now();
+
+        Document doc = Jsoup.connect(link)
+                .userAgent("Mozilla/5.0")
+                .timeout(10000)
+                .ignoreHttpErrors(true)
+                .get();
+
         Schedule schedule = new Schedule();
+
+        // Получаем блоки учебных дней для извлечения данных
+        Elements elementsScheduleDays = doc.getElementsByClass("schedule__day");
+
+        // Извлекаем данные о каждом учебном дне
+        for (Element scheduleDay : elementsScheduleDays)
+        {
+            Day day = new Day();
+            day.setDayOfWeek(scheduleDay.select(".schedule__date").text());
+
+            Elements elementsLessons = scheduleDay.select(".lesson");
+            for (Element elementLesson : elementsLessons)
+            {
+
+                Lesson lesson = new Lesson();
+
+                Element div = elementLesson.select(".lesson__subject").first();
+                lesson.setSubject(div.children().get(2).text());
+
+                div = elementLesson.select(".lesson__time").first();
+                lesson.setStartTime(div.children().get(0).text());
+                lesson.setEndTime(div.children().get(2).text());
+
+                lesson.setType(elementLesson.select(".lesson__type").text());
+
+                div = elementLesson.select(".lesson__teachers").first()
+                        .select(".lesson__link").first();
+                lesson.setTeacher(div.children().get(2).text());
+
+                div = elementLesson.select(".lesson__places").first()
+                        .select(".lesson__link").first();
+                String room = "";
+                room += div.select("span").first().select("span").first().text();
+                div = div.children().last();
+                room = room + div.children().get(0).text() + div.children().get(1).text();
+                lesson.setRoom(room);
+
+                /*div = elementLesson.select(".lesson__resource_links").first();
+                System.out.println("Получили блок с ссылкой: " + div.toString());
+                lesson.setSdoAddress(div.select("a").first().attr("href"));
+                System.out.println("Получили адрес СДО: " + lesson.getSdoAddress());*/
+
+                day.addLesson(lesson);
+            }
+
+            schedule.addDay(day);
+
+        }
+
         schedule.setGroupNumber(groupNumber);
         schedule.setLastUpdated(LocalDateTime.now());
 
-        JSONArray lessonsJson = (JSONArray) json.get("lessons");
-        List<Lesson> lessons = new ArrayList<>();
-
-        for (Object lessonObj : lessonsJson)
-        {
-            // TODO: Часть кода для отладки. Удалить.
-            for (Object key : json.keySet()) {
-                System.out.println("Ключ: " + key + ", Значение: " + json.get(key));
-            }
-            // Удалить до сюда.
-
-            JSONObject lessonJson = (JSONObject) lessonObj;
-            Lesson lesson = new Lesson();
-
-            lesson.setSchedule(schedule);
-            lesson.setSubject(getStringSafe(lessonJson, "subject"));
-            lesson.setType(getStringSafe(lessonJson, "type"));
-            lesson.setTeacher(getStringSafe(lessonJson, "teacher"));
-            lesson.setRoom(getStringSafe(lessonJson, "room"));
-            lesson.setSdoAddress(getStringSafe(lessonJson, "sdoAddress"));
-            lesson.setStartTime(getStringSafe(lessonJson, "startTime"));
-            lesson.setEndTime(getStringSafe(lessonJson, "endTime"));
-            lesson.setDayOfWeek(getStringSafe(lessonJson, "dayOfWeek"));
-
-            lessons.add(lesson);
-        }
-
-        schedule.setLessons(lessons);
         return schedule;
-    }
-
-    // Вспомогательный метод для безопасного получения строки
-    private String getStringSafe(JSONObject json, String key) {
-        return json.containsKey(key) ? json.get(key).toString() : "N/A";
     }
 
 }

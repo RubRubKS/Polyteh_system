@@ -1,5 +1,6 @@
 package com.example.schedule.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,9 +18,10 @@ public class Lesson {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "schedule_id", nullable = false)
-    private Schedule schedule; // К какому расписанию пара принадлежит
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "day_id", nullable = false)
+    @JsonBackReference
+    private Day day; // К какому расписанию пара принадлежит
 
     @Column(nullable = false)
     private String subject;
@@ -35,9 +37,6 @@ public class Lesson {
     private String startTime; // Когда начинается
     @Column(nullable = false)
     private String endTime;   // Когда заканчивается
-
-    @Column(nullable = false)
-    private String dayOfWeek;       // День недели (Пн, Вт и т.д.)
 
     @Column
     private String comment; // Комментарий студента к паре (если есть)
