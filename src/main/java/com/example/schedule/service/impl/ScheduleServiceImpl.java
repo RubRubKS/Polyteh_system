@@ -71,13 +71,12 @@ public class ScheduleServiceImpl implements ScheduleService {
     private Schedule getScheduleFromWebsite(String groupNumber) throws IOException {
 
         // Получаем параметры соответствующей группы (id и faculty) для получения их расписания
-        /*Group group = groupRepository.getGroupByGroupNumber(groupNumber).orElseThrow(() ->
-                new ErrorResponse("Group not found for group " + groupNumber));*/
+        Group group = groupRepository.getGroupByGroupNumber(groupNumber).orElseThrow(() ->
+                new ErrorResponse("Group not found for group " + groupNumber));
 
         // Получаем HTML-код страницы расписания указанной группы
-        /*String link = externalUrl + "faculty/" + group.getFaculty() + "/groups/" + group.getGroupId()
-                + "?date=" + LocalDateTime.now();*/
-        String link = externalUrl + "faculty/125/groups/40455?date=" + LocalDate.now();
+        String link = externalUrl + "faculty/" + group.getFaculty() + "/groups/" + group.getGroupId()
+                + "?date=" + LocalDateTime.now();
 
         Document doc = Jsoup.connect(link)
                 .userAgent("Mozilla/5.0")
@@ -123,6 +122,7 @@ public class ScheduleServiceImpl implements ScheduleService {
                 room = room + div.children().get(0).text() + div.children().get(1).text();
                 lesson.setRoom(room);
 
+                // TODO: Добавить парсинг адреса СДО
                 /*div = elementLesson.select(".lesson__resource_links").first();
                 System.out.println("Получили блок с ссылкой: " + div.toString());
                 lesson.setSdoAddress(div.select("a").first().attr("href"));
