@@ -8,5 +8,6 @@ import java.util.Optional;
 public interface GroupRepository extends JpaRepository<Group, Long> {
 
     public Optional<Group> getGroupByGroupNumber(String groupNumber);
+    public void deleteGroupByGroupNumber(String groupNumber);
 
 }

@@ -31,7 +31,7 @@ public class Lesson {
     private String teacher;
     @Column(nullable = false)
     private String room;
-    @Column
+    @Column(nullable = false)
     private String sdoAddress; // Ссылка на СДО (если есть)
     @Column(nullable = false)
     private String startTime; // Когда начинается

@@ -76,7 +76,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
         // Получаем HTML-код страницы расписания указанной группы
         String link = externalUrl + "faculty/" + group.getFaculty() + "/groups/" + group.getGroupId()
-                + "?date=" + LocalDateTime.now();
+                + "?date=" + LocalDate.now();
 
         Document doc = Jsoup.connect(link)
                 .userAgent("Mozilla/5.0")
@@ -101,32 +101,79 @@ public class ScheduleServiceImpl implements ScheduleService {
 
                 Lesson lesson = new Lesson();
 
+                // Получаем название предмета
                 Element div = elementLesson.select(".lesson__subject").first();
-                lesson.setSubject(div.children().get(2).text());
+                if (!(div == null || div.children().get(2).text().isEmpty()))
+                {
+                    lesson.setSubject(div.children().get(2).text());
+                }
 
+                // Получаем время проведения пары
                 div = elementLesson.select(".lesson__time").first();
-                lesson.setStartTime(div.children().get(0).text());
-                lesson.setEndTime(div.children().get(2).text());
+                if (!(div == null || div.children().get(0).text().isEmpty() || div.children().get(2).text().isEmpty()))
+                {
+                    lesson.setStartTime(div.children().get(0).text());
+                    lesson.setEndTime(div.children().get(2).text());
+                }
+                else
+                {
+                    lesson.setStartTime("N/A");
+                    lesson.setEndTime("N/A");
+                }
 
-                lesson.setType(elementLesson.select(".lesson__type").text());
+                // Получаем тип пары
+                if (!(elementLesson.select(".lesson__type").text().isEmpty()))
+                {
+                    lesson.setType(elementLesson.select(".lesson__type").text());
+                }
+                else
+                {
+                    lesson.setType("N/A");
+                }
 
-                div = elementLesson.select(".lesson__teachers").first()
-                        .select(".lesson__link").first();
-                lesson.setTeacher(div.children().get(2).text());
+                // Получаем имя преподавателя
+                div = elementLesson.select(".lesson__teachers").first();
+                if (div != null)
+                {
+                    div = div.select(".lesson__link").first();
+                }
+                if (!(div == null || div.children().get(2).text().isEmpty()))
+                {
+                    lesson.setTeacher(div.children().get(2).text());
+                }
+                else
+                {
+                    lesson.setTeacher("N/A");
+                }
 
-                div = elementLesson.select(".lesson__places").first()
-                        .select(".lesson__link").first();
-                String room = "";
-                room += div.select("span").first().select("span").first().text();
-                div = div.children().last();
-                room = room + div.children().get(0).text() + div.children().get(1).text();
-                lesson.setRoom(room);
-
-                // TODO: Добавить парсинг адреса СДО
-                /*div = elementLesson.select(".lesson__resource_links").first();
-                System.out.println("Получили блок с ссылкой: " + div.toString());
-                lesson.setSdoAddress(div.select("a").first().attr("href"));
-                System.out.println("Получили адрес СДО: " + lesson.getSdoAddress());*/
+                // Получаем аудиторию
+                div = elementLesson.select(".lesson__places").first();
+                if (div != null)
+                {
+                    div = div.select(".lesson__link").first();
+                }
+                if (!(div == null || div.select("span").first().select("span").first().text().isEmpty()))
+                {
+                    String room = "";
+                    room += div.select("span").first().select("span").first().text();
+                    div = div.children().last();
+                    room = room + div.children().get(0).text() + div.children().get(1).text();
+                    lesson.setRoom(room);
+                }
+                else
+                {
+                    lesson.setRoom("N/A");
+                }
+                
+                div = elementLesson.select(".lesson__resource_links").first();
+                if (!(div == null || div.select("a").first().attr("href").isEmpty()))
+                {
+                    lesson.setSdoAddress(div.select("a").first().attr("href"));
+                }
+                else
+                {
+                    lesson.setSdoAddress("N/A");
+                }
 
                 day.addLesson(lesson);
             }
