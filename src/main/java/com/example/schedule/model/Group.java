@@ -17,10 +17,10 @@ public class Group {
     @GeneratedValue
     private Long id;
 
-    @Column
+    @Column(unique = true, nullable = false)
     private String groupNumber;
-    @Column
+    @Column(unique = true, nullable = false)
     private String groupId;
-    @Column
+    @Column(nullable = false)
     private String faculty;
 }

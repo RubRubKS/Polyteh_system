@@ -1,48 +1,36 @@
 package com.example.schedule.controller;
 
-import com.example.schedule.repository.DeadlineRepository;
 import com.example.schedule.model.Deadline;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import com.example.schedule.service.DeadlineService;
+import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-@Controller
-@RequestMapping("/deadlines")
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/v1/deadlines")
+@AllArgsConstructor
 public class DeadlineController {
 
-    private final DeadlineRepository deadlineRepository;
+    private final DeadlineService deadlineService;
 
-    public DeadlineController(DeadlineRepository deadlineRepository) {
-        this.deadlineRepository = deadlineRepository;
+    @GetMapping("/{user_id}")
+    public List<Deadline> listDeadlines(@PathVariable Long user_id) {
+        return deadlineService.findAllDeadlines(user_id);
     }
 
-    @GetMapping
-    public String listDeadlines(Model model) {
-        model.addAttribute("deadlines", deadlineRepository.findAll());
-        return "deadlines/list";
+    @PostMapping("/{user_id}/save_deadline")
+    public String saveDeadline(@PathVariable Long user_id, @RequestBody Deadline deadline) {
+        return deadlineService.saveDeadline(user_id, deadline);
     }
 
-    @GetMapping("/new")
-    public String showCreateForm(Model model) {
-        model.addAttribute("deadline", new Deadline());
-        return "deadlines/form";
-    }
+   @PutMapping("/{user_id}/update_deadline")
+   public String updateDeadline(@PathVariable Long user_id, @RequestBody Deadline deadline) {
+        return deadlineService.updateDeadline(user_id, deadline);
+   }
 
-    @PostMapping("/save")
-    public String saveDeadline(@ModelAttribute Deadline deadline) {
-        deadlineRepository.save(deadline);
-        return "redirect:/deadlines";
-    }
-
-    @GetMapping("/edit/{id}")
-    public String showEditForm(@PathVariable Long id, Model model) {
-        model.addAttribute("deadline", deadlineRepository.findById(id).orElseThrow());
-        return "deadlines/form";
-    }
-
-    @GetMapping("/delete/{id}")
-    public String deleteDeadline(@PathVariable Long id) {
-        deadlineRepository.deleteById(id);
-        return "redirect:/deadlines";
+    @DeleteMapping("/{user_id}/delete/{deadline_id}")
+    public String deleteDeadline(@PathVariable Long user_id, @PathVariable Long deadline_id) {
+        return deadlineService.deleteDeadline(user_id, deadline_id);
     }
 }

@@ -38,6 +38,18 @@ dependencies {
 
     // Библиотека для парсинга
     implementation 'org.jsoup:jsoup:1.20.1'
+
+    // Spring Security
+    // implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // JWT библиотеки (JJWT)
+    /*implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'*/
+
+    // Дополнительно (если нет)
+    /*implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'org.springframework.boot:spring-boot-starter-web'*/
 }
 
 test {

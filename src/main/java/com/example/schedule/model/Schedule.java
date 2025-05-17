@@ -21,12 +21,12 @@ public class Schedule {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "group_number")
+    @Column(name = "group_number", nullable = false)
     private String groupNumber;
     @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<Day> days = new ArrayList<>();
-    @Column(name = "last_updated")
+    @Column(name = "last_updated", nullable = false)
     private LocalDateTime lastUpdated;
 
     // Метод для корректного добавления объекта класса Day

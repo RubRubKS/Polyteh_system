@@ -21,7 +21,7 @@ public class Day {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
+    @Column(nullable = false)
     private String dayOfWeek;
     @OneToMany(mappedBy = "day", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
