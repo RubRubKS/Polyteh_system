@@ -3,15 +3,16 @@ package com.example.schedule.model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Data
 @Entity
 @Table(name = "deadlines")
 @RequiredArgsConstructor
+@DynamicUpdate
 public class Deadline {
 
     @Id
@@ -29,6 +30,8 @@ public class Deadline {
 
     @Column
     private String importance;
+    @Column
+    private String chat_id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

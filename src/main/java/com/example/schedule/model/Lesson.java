@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Data
 @Entity
@@ -40,4 +40,10 @@ public class Lesson {
 
     @Column
     private String comment; // Комментарий студента к паре (если есть)
+
+    public boolean isSameLesson(Lesson firstLesson, Lesson secondLesson) {
+        return Objects.equals(firstLesson.getSubject(), secondLesson.getSubject()) &&
+                Objects.equals(firstLesson.getType(), secondLesson.getType()) &&
+                Objects.equals(firstLesson.getStartTime(), secondLesson.getStartTime());
+    }
 }

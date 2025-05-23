@@ -32,42 +32,41 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Value("${external.url}")
     private String externalUrl;
 
+    @Value("${schedule.update.threshold.hours}")
+    private int updateThresholdHours;
+
     @Override
     public Schedule getScheduleByGroupNumber(String groupNumber) throws IOException {
 
         // Проверяем наличие расписания в БД
-        Optional<Schedule> existingSchedule = scheduleRepository.getScheduleByGroupNumber(groupNumber);
         Optional<LocalDateTime> lastUpdated = scheduleRepository.findLastUpdatedByGroupNumber(groupNumber);
 
-        // TODO: Добавить автообновление расписания
-        // Проверяем наличие расписания
-        boolean needsUpdate = lastUpdated.isEmpty();
+        // Проверяем наличие расписания и необходимость его проверки
+       if (lastUpdated.isEmpty() || lastUpdated.get().isBefore(LocalDateTime.now().minusHours(updateThresholdHours)))
+       {
+           return getOrUpdateSchedule(groupNumber);
+       }
 
-        // Если нужно обновить расписание или его вовсе нет, парсим сайт Политеха
-        if (needsUpdate) {
-            return getOrUpdateSchedule(groupNumber);
-        }
-
+       // Если расписание было изначально или оно было обновлено
+        Optional<Schedule> existingSchedule = scheduleRepository.getScheduleByGroupNumber(groupNumber);
         return existingSchedule.orElseThrow(() ->
                 new ErrorResponse("Schedule not found for group " + groupNumber));
     }
 
     private Schedule getOrUpdateSchedule(String groupNumber) throws IOException {
-
         // Получение нового расписания с сайта ruz
         Schedule schedule = getScheduleFromWebsite(groupNumber);
-
         // Обновление БД
         // Удаление старого расписания (если есть)
         scheduleRepository.getScheduleByGroupNumber(groupNumber)
                 .ifPresent(s -> scheduleRepository.deleteScheduleByGroupNumber(s.getGroupNumber()));
         // Добавление нового расписания в БД
         scheduleRepository.save(schedule);
-
         return schedule;
     }
 
     // Функция для парсинга сайта расписания
+    //TODO: Проследить, что не возвращает null
     private Schedule getScheduleFromWebsite(String groupNumber) throws IOException {
 
         // Получаем параметры соответствующей группы (id и faculty) для получения их расписания
