@@ -37,13 +37,4 @@ public class Lesson {
     private String startTime; // Когда начинается
     @Column(nullable = false)
     private String endTime;   // Когда заканчивается
-
-    @Column
-    private String comment; // Комментарий студента к паре (если есть)
-
-    public boolean isSameLesson(Lesson firstLesson, Lesson secondLesson) {
-        return Objects.equals(firstLesson.getSubject(), secondLesson.getSubject()) &&
-                Objects.equals(firstLesson.getType(), secondLesson.getType()) &&
-                Objects.equals(firstLesson.getStartTime(), secondLesson.getStartTime());
-    }
 }

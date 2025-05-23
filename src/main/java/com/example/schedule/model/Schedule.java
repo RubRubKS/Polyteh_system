@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,8 @@ public class Schedule {
 
     @Column(name = "group_number", nullable = false)
     private String groupNumber;
+    @Column(name = "first_day")
+    private LocalDate startDate;
     @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<Day> days = new ArrayList<>();

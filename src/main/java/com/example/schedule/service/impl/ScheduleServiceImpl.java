@@ -36,29 +36,29 @@ public class ScheduleServiceImpl implements ScheduleService {
     private int updateThresholdHours;
 
     @Override
-    public Schedule getScheduleByGroupNumber(String groupNumber) throws IOException {
+    public Schedule getScheduleByGroupNumberAndDate(String groupNumber, LocalDate startDate) throws IOException {
 
         // Проверяем наличие расписания в БД
-        Optional<LocalDateTime> lastUpdated = scheduleRepository.findLastUpdatedByGroupNumber(groupNumber);
+        Optional<Schedule> existingSchedule = scheduleRepository.getScheduleByGroupNumberAndStartDate(groupNumber, startDate);
+        Optional<LocalDateTime> lastUpdated = scheduleRepository.findLastUpdatedByGroupNumberAndStartDate(groupNumber, startDate);
 
         // Проверяем наличие расписания и необходимость его проверки
        if (lastUpdated.isEmpty() || lastUpdated.get().isBefore(LocalDateTime.now().minusHours(updateThresholdHours)))
        {
-           return getOrUpdateSchedule(groupNumber);
+           return getOrUpdateSchedule(groupNumber, startDate);
        }
 
        // Если расписание было изначально или оно было обновлено
-        Optional<Schedule> existingSchedule = scheduleRepository.getScheduleByGroupNumber(groupNumber);
         return existingSchedule.orElseThrow(() ->
                 new ErrorResponse("Schedule not found for group " + groupNumber));
     }
 
-    private Schedule getOrUpdateSchedule(String groupNumber) throws IOException {
+    private Schedule getOrUpdateSchedule(String groupNumber, LocalDate startDate) throws IOException {
         // Получение нового расписания с сайта ruz
-        Schedule schedule = getScheduleFromWebsite(groupNumber);
+        Schedule schedule = getScheduleFromWebsite(groupNumber, startDate);
         // Обновление БД
         // Удаление старого расписания (если есть)
-        scheduleRepository.getScheduleByGroupNumber(groupNumber)
+        scheduleRepository.getScheduleByGroupNumberAndStartDate(groupNumber, startDate)
                 .ifPresent(s -> scheduleRepository.deleteScheduleByGroupNumber(s.getGroupNumber()));
         // Добавление нового расписания в БД
         scheduleRepository.save(schedule);
@@ -67,7 +67,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     // Функция для парсинга сайта расписания
     //TODO: Проследить, что не возвращает null
-    private Schedule getScheduleFromWebsite(String groupNumber) throws IOException {
+    private Schedule getScheduleFromWebsite(String groupNumber, LocalDate startDate) throws IOException {
 
         // Получаем параметры соответствующей группы (id и faculty) для получения их расписания
         Group group = groupRepository.getGroupByGroupNumber(groupNumber).orElseThrow(() ->
@@ -75,7 +75,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
         // Получаем HTML-код страницы расписания указанной группы
         String link = externalUrl + "faculty/" + group.getFaculty() + "/groups/" + group.getGroupId()
-                + "?date=" + LocalDate.now();
+                + "?date=" + startDate.toString();
 
         Document doc = Jsoup.connect(link)
                 .userAgent("Mozilla/5.0")
@@ -183,6 +183,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
         schedule.setGroupNumber(groupNumber);
         schedule.setLastUpdated(LocalDateTime.now());
+        schedule.setStartDate(startDate);
 
         return schedule;
     }

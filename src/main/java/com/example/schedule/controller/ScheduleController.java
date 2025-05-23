@@ -5,9 +5,12 @@ import com.example.schedule.model.Schedule;
 import com.example.schedule.repository.ScheduleRepository;
 import com.example.schedule.service.ScheduleService;
 import lombok.AllArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/v1/schedule")
@@ -17,11 +20,14 @@ public class ScheduleController {
     private final ScheduleRepository scheduleRepository;
     ScheduleService scheduleService;
 
-    @GetMapping ("/{group_number}")
-    public ResponseEntity<?> getScheduleByGroupNumber(@PathVariable String group_number) {
+    @GetMapping ("/{group_number}/{date}")
+    public ResponseEntity<?> getScheduleByGroupNumber(
+            @PathVariable String group_number,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date)
+    {
 
         try {
-            Schedule schedule = scheduleService.getScheduleByGroupNumber(group_number); // Обращаемся в сервис для получения расписания
+            Schedule schedule = scheduleService.getScheduleByGroupNumberAndDate(group_number, date); // Обращаемся в сервис для получения расписания
 
             // Расписание не найдено
             if (schedule == null) {
